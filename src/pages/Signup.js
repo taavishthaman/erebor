@@ -4,6 +4,7 @@ import Envelop from "../assets/envelop.svg";
 import Lock from "../assets/lock.svg";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { useSignup } from "./useSignup";
 
 const FormContainer = styled.div`
   display: flex;
@@ -149,7 +150,15 @@ const BottomLink = styled.a`
 `;
 
 function Signup() {
+  const { register, handleSubmit, formState } = useForm();
+  const { errors } = formState;
+  const { signup, isLoading } = useSignup();
   const navigate = useNavigate();
+
+  function onSubmit(data) {
+    const { email, password, passwordConfirm } = data;
+    signup({ email, password, passwordConfirm });
+  }
 
   return (
     <FormContainer>
@@ -165,20 +174,48 @@ function Signup() {
               Let's get you started posting and upvoting feedbacks!
             </Subtitle>
           </TitleHeader>
-          <Form>
+          <Form onSubmit={handleSubmit(onSubmit)}>
             <FormRow>
-              <Label>Email address</Label>
-              <Input placeholder="e.g. alex@email.com"></Input>
+              <Label error={errors?.email?.message?.toString()}>
+                Email address
+              </Label>
+              <Input
+                placeholder="e.g. alex@email.com"
+                type="email"
+                id="email"
+                {...register("email", {
+                  required: "Can't be empty",
+                })}
+                error={errors?.email?.message?.toString()}
+              ></Input>
               <FieldImg src={Envelop}></FieldImg>
             </FormRow>
             <FormRow>
-              <Label>Create password</Label>
-              <Input placeholder="Atleast 8 characters"></Input>
+              <Label error={errors?.password?.message?.toString()}>
+                Create password
+              </Label>
+              <Input
+                placeholder="Atleast 8 characters"
+                type="password"
+                id="password"
+                {...register("password", {
+                  required: "Please check again!",
+                })}
+                error={errors?.password?.message?.toString()}
+              ></Input>
               <FieldImg src={Lock}></FieldImg>
             </FormRow>
             <FormRow>
               <Label>Confirm password</Label>
-              <Input placeholder="Atleast 8 characters"></Input>
+              <Input
+                placeholder="Atleast 8 characters"
+                type="password"
+                id="passwordConfirm"
+                {...register("passwordConfirm", {
+                  required: "Passwords should match!",
+                })}
+                error={errors?.passwordConfirm?.message?.toString()}
+              ></Input>
               <FieldImg src={Lock}></FieldImg>
             </FormRow>
             <FormRow>

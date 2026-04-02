@@ -4,6 +4,7 @@ import Envelop from "../assets/envelop.svg";
 import Lock from "../assets/lock.svg";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { useLogin } from "./useLogin";
 
 const FormContainer = styled.div`
   display: flex;
@@ -143,7 +144,15 @@ const BottomLink = styled.a`
 `;
 
 function Login() {
+  const { register, handleSubmit, formState } = useForm();
+  const { errors } = formState;
+  const { login, isLoading } = useLogin();
   const navigate = useNavigate();
+
+  function onSubmit(data) {
+    const { email, password } = data;
+    login({ email, password });
+  }
 
   return (
     <FormContainer>
@@ -157,15 +166,35 @@ function Login() {
             <Title>Login</Title>
             <Subtitle>Add your details below to get back into the app</Subtitle>
           </TitleHeader>
-          <Form>
+          <Form onSubmit={handleSubmit(onSubmit)}>
             <FormRow>
-              <Label>Email address</Label>
-              <Input placeholder="e.g. alex@email.com"></Input>
+              <Label error={errors?.email?.message?.toString()}>
+                Email address
+              </Label>
+              <Input
+                placeholder="e.g. alex@email.com"
+                type="email"
+                id="email"
+                {...register("email", {
+                  required: "This field is required",
+                })}
+                error={errors?.email?.message?.toString()}
+              ></Input>
               <FieldImg src={Envelop}></FieldImg>
             </FormRow>
             <FormRow>
-              <Label>Password</Label>
-              <Input placeholder="Enter your password"></Input>
+              <Label error={errors?.password?.message?.toString()}>
+                Password
+              </Label>
+              <Input
+                placeholder="Enter your password"
+                type="password"
+                id="password"
+                {...register("password", {
+                  required: "This field is required",
+                })}
+                error={errors?.password?.message?.toString()}
+              ></Input>
               <FieldImg src={Lock}></FieldImg>
             </FormRow>
             <FormRow>
