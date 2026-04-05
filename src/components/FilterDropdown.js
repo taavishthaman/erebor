@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import Select from "react-dropdown-select";
+import Tick from "../assets/tick_purple.svg";
 
 const Dropdown = styled.div`
   display: flex;
@@ -21,6 +22,11 @@ const DropdownIcon = styled.img``;
 const StyledSelect = styled(Select)`
   border: none !important;
   color: var(--08, #0c0e16);
+
+  .react-dropdown-select-content {
+    color: white !important;
+  }
+
   .react-dropdown-select-dropdown-handle svg {
     fill: white !important;
   }
@@ -41,30 +47,34 @@ const StyledSelect = styled(Select)`
   }
 `;
 
-function FilterDropdown({ setSelectedType }) {
+function FilterDropdown({ changeSortCriteria }) {
   const options = [
     {
       value: 1,
       label: "Most Upvotes",
+      criteria: "most_upvotes",
     },
     {
       value: 2,
       label: "Least Upvotes",
+      criteria: "least_upvotes",
     },
     {
       value: 3,
       label: "Most Comments",
+      criteria: "most_comments",
     },
     {
       value: 4,
       label: "Least Comments",
+      criteria: "least_comments",
     },
   ];
 
   return (
     <Dropdown>
       <StyledSelect
-        placeholder="Filter by criteria"
+        placeholder="Sort by criteria"
         options={options}
         itemRenderer={({ item, itemIndex, props, state, methods }) => (
           <div
@@ -82,8 +92,7 @@ function FilterDropdown({ setSelectedType }) {
         )}
         values={[]}
         onChange={(values) => {
-          if (values.length) setSelectedType(values[0].label);
-          else setSelectedType("");
+          changeSortCriteria(values[0]);
         }}
       ></StyledSelect>
     </Dropdown>

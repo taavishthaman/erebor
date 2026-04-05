@@ -4,9 +4,12 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AppLayout from "./components/AppLayout";
 import Feedbacks from "./pages/Feedbacks";
+import AddFeedback from "./pages/AddFeedback";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
+import FeedbackDetails from "./pages/FeedbackDetails";
+import EditFeedback from "./pages/EditFeedback";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +35,12 @@ function App() {
             >
               <Route index element={<Navigate replace to="feedbacks" />} />
               <Route path="/feedbacks" element={<Feedbacks />} />
+              <Route path="/feedback/new" element={<AddFeedback />} />
+              <Route
+                path="/feedback/:id/comments"
+                element={<FeedbackDetails />}
+              />
+              <Route path="/feedback/:id/edit" element={<EditFeedback />} />
             </Route>
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<Signup />} />

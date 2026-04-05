@@ -1,10 +1,15 @@
 import styled from "styled-components";
+import { useSearchParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import useCategories from "./useCategories";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CompanyImg from "../assets/company_logo.svg";
 import FilterDropdown from "../components/FilterDropdown";
 import FeedbackCard from "../components/FeedbackCard";
+import useFeedbacks from "./useFeedbacks";
+import Spinner from "../components/Spinner";
+import EmptyFeedback from "../components/EmptyFeedback";
 
 const StyledFeedbackContainer = styled.div`
   display: flex;
@@ -18,7 +23,6 @@ const MainBody = styled.div`
   flex-direction: column;
   gap: 2.4rem;
   height: 80vh;
-  overflow-y: scroll;
 `;
 
 const Header = styled.div`
@@ -76,11 +80,44 @@ const AddFeedbackBtn = styled.button`
   cursor: pointer;
 `;
 
+const EmptyFeedbackContainer = styled.div`
+  height: 60rem;
+  width: 82.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+`;
+
+const FeedbackCardContainer = styled.div`
+  height: 80vh;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+`;
+
 function Feedbacks() {
-  //Fetch Categories
-  const { isLoading: isLoadingCategories, categories, error } = useCategories();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [feedbackCategories, setFeedbackCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState({});
+  const [selectedCriteria, setSelectedCriteria] = useState({});
+  const [filteredFeedbacks, setFilteredFeedbacks] = useState([]);
+
+  //Fetch Categories
+  const {
+    isLoading: isLoadingCategories,
+    categories,
+    error: errorCategories,
+  } = useCategories();
+
+  const {
+    isLoading: isLoadingFeedbacks,
+    feedbacks,
+    error: errorFeedbacks,
+  } = useFeedbacks();
 
   useEffect(() => {
     if (categories && categories.length) {
@@ -89,9 +126,44 @@ function Feedbacks() {
         ...categories,
       ]);
 
-      setSelectedCategory({ category_name: "All", category_id: 0 });
+      const query = searchParams.get("category_id");
+
+      if (query) {
+        setSelectedCategory(categories.find((c) => c.category_id === query));
+      } else {
+        setSelectedCategory({ category_name: "All", category_id: 0 });
+      }
     }
-  }, [categories]);
+  }, [categories, searchParams]);
+
+  useEffect(() => {
+    if (feedbacks && feedbacks.length) {
+      setFilteredFeedbacks(feedbacks);
+    } else {
+      setFilteredFeedbacks([]);
+    }
+  }, [feedbacks]);
+
+  const changeCategory = (category) => {
+    setSelectedCategory(category);
+    if (category.category_id) {
+      // setSearchParams({ category_id: category.category_id });
+      setSearchParams((prev) => {
+        prev.set("category_id", category.category_id);
+        return prev;
+      });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  const changeSortCriteria = (criteria) => {
+    setSelectedCriteria(criteria);
+    setSearchParams((prev) => {
+      prev.set("sort", criteria.criteria);
+      return prev;
+    });
+  };
 
   return (
     <StyledFeedbackContainer>
@@ -99,24 +171,50 @@ function Feedbacks() {
         isLoadingCategories={isLoadingCategories}
         categories={feedbackCategories}
         selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
+        changeCategory={changeCategory}
       />
       <MainBody>
         <Header>
           <LeftContainer>
             <InnerLeftContainer>
               <LightbulbImg src={CompanyImg} />
-              <SuggestionCount>6 Suggestions</SuggestionCount>
+              <SuggestionCount>
+                {filteredFeedbacks?.length} Suggestions
+              </SuggestionCount>
             </InnerLeftContainer>
-            <FilterDropdown />
+            <FilterDropdown changeSortCriteria={changeSortCriteria} />
           </LeftContainer>
-          <AddFeedbackBtn>+ Add Feedback</AddFeedbackBtn>
+          <AddFeedbackBtn
+            onClick={() => {
+              navigate("/feedback/new");
+            }}
+          >
+            + Add Feedback
+          </AddFeedbackBtn>
         </Header>
-        <FeedbackCard />
-        <FeedbackCard />
-        <FeedbackCard />
-        <FeedbackCard />
-        <FeedbackCard />
+        {isLoadingFeedbacks ? (
+          <EmptyFeedbackContainer>
+            <Spinner />
+          </EmptyFeedbackContainer>
+        ) : filteredFeedbacks.length === 0 ? (
+          <EmptyFeedbackContainer>
+            <EmptyFeedback />
+          </EmptyFeedbackContainer>
+        ) : (
+          <FeedbackCardContainer>
+            {filteredFeedbacks.map((feedback) => (
+              <FeedbackCard
+                key={feedback.feedback_id}
+                feedbackData={feedback}
+                category={
+                  feedbackCategories?.find(
+                    (f) => f.category_id === feedback.category_id,
+                  ).category_name
+                }
+              />
+            ))}
+          </FeedbackCardContainer>
+        )}
       </MainBody>
     </StyledFeedbackContainer>
   );

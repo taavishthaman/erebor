@@ -1,6 +1,11 @@
+import { useState } from "react";
 import styled from "styled-components";
 import ChevronUpBlue from "../assets/chevron_up_blue.svg";
+import ChevronUpWhite from "../assets/chevron_up_white.svg";
 import CommentIcon from "../assets/comment_icon.svg";
+import { useCreateUpvote } from "../pages/useCreateUpvote";
+import { useDeleteUpvote } from "../pages/useDeleteUpvote";
+import { useNavigate } from "react-router-dom";
 
 const StyledFeedbackCard = styled.div`
   width: 82.5rem;
@@ -11,6 +16,7 @@ const StyledFeedbackCard = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
 `;
 
 const LeftContainer = styled.div`
@@ -22,7 +28,7 @@ const UpvoteContainer = styled.div`
   width: 4rem;
   height: 5.3rem;
   border-radius: 1rem;
-  background: #f2f4fe;
+  background: ${(props) => (props.upvoted ? "#4661E6" : "#F2F4FE")};
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -36,7 +42,7 @@ const ChevronUp = styled.img`
 `;
 
 const UpvoteCount = styled.div`
-  color: #3a4374;
+  color: ${(props) => (props.upvoted ? "#fff" : "#3a4374")};
   text-align: center;
   font-family: Jost;
   font-size: 1.3rem;
@@ -114,27 +120,50 @@ const CommentCount = styled.div`
   letter-spacing: -0.222px;
 `;
 
-function FeedbackCard() {
+function FeedbackCard({ feedbackData, category }) {
+  const navigate = useNavigate();
+  const { createUpvote, isLoading: isLoadingUpvoteCreate } = useCreateUpvote();
+  const { deleteUpvote, isLoading: isLoadingUpvoteDelete } = useDeleteUpvote();
+  const [upvote, setUpvote] = useState(feedbackData.has_user_upvoted);
+
   return (
-    <StyledFeedbackCard>
+    <StyledFeedbackCard
+      onClick={() => {
+        navigate(`/feedback/${feedbackData.feedback_id}/comments`);
+      }}
+    >
       <LeftContainer>
-        <UpvoteContainer>
-          <ChevronUp src={ChevronUpBlue} />
-          <UpvoteCount>36</UpvoteCount>
+        <UpvoteContainer
+          upvoted={upvote}
+          onClick={(e) => {
+            e.stopPropagation();
+            setUpvote((prev) => {
+              if (prev === false) {
+                createUpvote({ feedbackId: feedbackData.feedback_id });
+                return true;
+              } else {
+                deleteUpvote({ feedbackId: feedbackData.feedback_id });
+                return false;
+              }
+            });
+          }}
+        >
+          <ChevronUp src={upvote ? ChevronUpWhite : ChevronUpBlue} />
+          <UpvoteCount upvoted={upvote}>
+            {feedbackData?.upvote_count || 0}
+          </UpvoteCount>
         </UpvoteContainer>
         <DetailContainer>
           <TopContainer>
-            <CardTitle>Add tags for solutions</CardTitle>
-            <CardDescription>
-              Easier to search for solutions based on a specific stack.
-            </CardDescription>
+            <CardTitle>{feedbackData?.title}</CardTitle>
+            <CardDescription>{feedbackData?.description}</CardDescription>
           </TopContainer>
-          <CategoryPill>Enhancement</CategoryPill>
+          <CategoryPill>{category}</CategoryPill>
         </DetailContainer>
       </LeftContainer>
       <RightContainer>
         <CommentIconImg src={CommentIcon} />
-        <CommentCount>3</CommentCount>
+        <CommentCount>{feedbackData?.comment_count || 0}</CommentCount>
       </RightContainer>
     </StyledFeedbackCard>
   );

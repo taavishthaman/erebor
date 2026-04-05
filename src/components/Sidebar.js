@@ -50,7 +50,7 @@ function Sidebar({
   isLoadingCategories,
   categories,
   selectedCategory,
-  setSelectedCategory,
+  changeCategory,
 }) {
   return (
     <StyledSidebar>
@@ -65,7 +65,7 @@ function Sidebar({
         isLoadingCategories={isLoadingCategories}
         categories={categories}
         selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
+        changeCategory={changeCategory}
       />
       <RoadmapStatus />
     </StyledSidebar>

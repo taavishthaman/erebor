@@ -35,7 +35,7 @@ function CategoriesFilterContainer({
   isLoadingCategories,
   categories,
   selectedCategory,
-  setSelectedCategory,
+  changeCategory,
 }) {
   if (isLoadingCategories) {
     return <Spinner />;
@@ -46,7 +46,7 @@ function CategoriesFilterContainer({
       {categories.map((category) => (
         <CategoryPill
           onClick={() => {
-            setSelectedCategory(category);
+            changeCategory(category);
           }}
           selected={category.category_name === selectedCategory.category_name}
         >
