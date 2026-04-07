@@ -4,7 +4,11 @@ import useFeedback from "./useFeedback";
 import FeedbackCard from "../components/FeedbackCard";
 import useCategories from "./useCategories";
 import Spinner from "../components/Spinner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import NestedComments from "../components/NestedComments";
+import useComments from "./useComments";
+import { useCreateComment } from "./useCreateComment";
 
 const FeedbackDetailsContainer = styled.div`
   width: 100%;
@@ -17,7 +21,7 @@ const StyledFeedbackContainer = styled.div`
   flex-direction: column;
   gap: 2.4rem;
   align-items: center;
-  margin-top: 8rem;
+  margin-top: 2rem;
 `;
 
 const Header = styled.div`
@@ -31,6 +35,7 @@ const LeftContainer = styled.div`
   display: flex;
   gap: 1rem;
   align-items: center;
+  cursor: pointer;
 `;
 
 const ChevronLeftImg = styled.img`
@@ -67,7 +72,7 @@ const CommentBox = styled.div`
   border-radius: 1rem;
   background: #fff;
   width: 82.5rem;
-  height: 35rem;
+  height: 40rem;
   display: flex;
   flex-direction: column;
   gap: 2.8rem;
@@ -81,6 +86,11 @@ const ContainerHeading = styled.div`
   font-weight: 700;
   line-height: normal;
   letter-spacing: -0.25px;
+`;
+
+const NestedCommentsContainer = styled.div`
+  height: 62rem;
+  overflow-y: scroll;
 `;
 
 const AddCommentContainer = styled.div`
@@ -138,6 +148,19 @@ const PostCommentButton = styled.button`
 
 function FeedbackDetails() {
   const navigate = useNavigate();
+  const { id: feedbackId } = useParams();
+
+  const {
+    isLoading: isLoadingComments,
+    comments: commentsFlat,
+    error: errorComments,
+  } = useComments();
+
+  const [replyId, setReplyId] = useState("");
+  const [comments, setComments] = useState({ children: {} });
+
+  const [parentComment, setParentComment] = useState("");
+  const [reply, setReply] = useState("");
 
   const {
     isLoading: isLoadingFeedback,
@@ -151,6 +174,97 @@ function FeedbackDetails() {
     error: errorCategories,
   } = useCategories();
 
+  const { createComment, isLoading: isLoadingCreateComments } =
+    useCreateComment();
+
+  const goBack = () => {
+    navigate("/feedbacks");
+  };
+
+  useEffect(() => {
+    const recursivelyFillObject = (commentsFlatList, commentsObj) => {
+      const currentLevelIds = Object.keys(commentsObj);
+
+      if (currentLevelIds.length === 0) {
+        return;
+      }
+
+      for (let i = 0; i < commentsFlatList.length; i++) {
+        const currComment = commentsFlatList[i];
+        if (currentLevelIds.includes(currComment.parent_comment_id)) {
+          commentsObj[currComment.parent_comment_id].children[
+            currComment.comment_id
+          ] = {
+            ...currComment,
+            children: {},
+          };
+        } else {
+          for (let j = 0; j < currentLevelIds.length; j++) {
+            recursivelyFillObject(
+              commentsFlatList,
+              commentsObj[currentLevelIds[j]].children,
+            );
+          }
+        }
+      }
+    };
+
+    if (commentsFlat && commentsFlat.length) {
+      const commentsFlatList = [...commentsFlat];
+
+      let commentsObj = {};
+
+      //1) Fill the top level comments
+      for (let i = 0; i < commentsFlatList.length; i++) {
+        const currComment = commentsFlatList[i];
+        if (currComment.parent_comment_id === null) {
+          commentsObj[currComment.comment_id] = {
+            ...currComment,
+            children: {},
+          };
+          commentsFlatList.splice(i, 1);
+          i--;
+        }
+      }
+
+      //2) Fill the nested comments recursively
+      recursivelyFillObject(commentsFlatList, commentsObj);
+
+      setComments({ children: { ...commentsObj } });
+    }
+  }, [commentsFlat]);
+
+  const toggleReply = (id) => {
+    setReplyId((prev) => {
+      if (prev) {
+        return "";
+      } else {
+        return id;
+      }
+    });
+  };
+
+  const postComment = () => {
+    const data = {
+      comment: parentComment,
+    };
+
+    createComment({ feedbackId, data });
+    setParentComment("");
+  };
+
+  const postReply = () => {
+    createComment({
+      feedbackId,
+      data: {
+        comment: reply,
+        parentId: replyId,
+      },
+    });
+    toggleReply();
+    setReply("");
+  };
+
   if (isLoadingFeedback || isLoadingCategories) {
     return <Spinner />;
   }
@@ -161,7 +275,13 @@ function FeedbackDetails() {
         <Header>
           <LeftContainer>
             <ChevronLeftImg src={ChevronLeft} />
-            <GoBackText>Go Back</GoBackText>
+            <GoBackText
+              onClick={() => {
+                goBack();
+              }}
+            >
+              Go Back
+            </GoBackText>
           </LeftContainer>
           <EditFeedbackButton
             onClick={() => {
@@ -180,14 +300,43 @@ function FeedbackDetails() {
           }
         />
         <CommentBox>
-          <ContainerHeading>4 Comments</ContainerHeading>
+          <ContainerHeading>
+            {commentsFlat.length || 0} Comments
+          </ContainerHeading>
+          <NestedCommentsContainer>
+            <NestedComments
+              comments={comments.children}
+              depth={0}
+              isFirst={true}
+              toggleReply={toggleReply}
+              replyId={replyId}
+              setReply={setReply}
+              postReply={postReply}
+            />
+          </NestedCommentsContainer>
         </CommentBox>
         <AddCommentContainer>
           <ContainerHeading>Add Comment</ContainerHeading>
-          <CommentArea placeholder="Type your comment here"></CommentArea>
+          <CommentArea
+            placeholder="Type your comment here"
+            onChange={(e) => {
+              setParentComment(e.target.value);
+            }}
+            value={parentComment}
+            maxLength={250}
+          ></CommentArea>
           <BottomRow>
-            <CharactersLeft>250 Characters left</CharactersLeft>
-            <PostCommentButton>Post Comment</PostCommentButton>
+            <CharactersLeft>
+              {250 - parentComment.length} Characters left
+            </CharactersLeft>
+            <PostCommentButton
+              onClick={() => {
+                postComment();
+                setParentComment("");
+              }}
+            >
+              Post Comment
+            </PostCommentButton>
           </BottomRow>
         </AddCommentContainer>
       </StyledFeedbackContainer>

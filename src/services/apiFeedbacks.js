@@ -163,3 +163,46 @@ export async function deleteUpvote({ feedbackId }) {
 
   return data;
 }
+
+export async function getComments({ feedbackId }) {
+  let url = baseUrl + `/api/v1/feedback/${feedbackId}/comment`;
+
+  const options = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${Cookies.get("jwt")}`,
+      "Content-Type": "application/json",
+    },
+  };
+
+  const response = await fetch(url, options);
+  const data = await response.json();
+
+  if (data.status !== "success") {
+    throw new Error(data.message);
+  }
+
+  return data.data.comments;
+}
+
+export async function postComment({ feedbackId, data }) {
+  let url = baseUrl + `/api/v1/feedback/${feedbackId}/comment`;
+
+  const options = {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${Cookies.get("jwt")}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  };
+
+  const response = await fetch(url, options);
+  const dataRes = await response.json();
+
+  if (dataRes.status !== "success") {
+    throw new Error(dataRes.message);
+  }
+
+  return dataRes.data.comment;
+}

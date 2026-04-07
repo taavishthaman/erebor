@@ -4,7 +4,6 @@ import { getFeedback } from "../services/apiFeedbacks";
 
 export default function useFeedback() {
   const { id: feedbackId } = useParams();
-  console.log(useParams());
 
   const {
     isLoading,
