@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 const RoadmapStatusContainer = styled.div`
   padding: 2.4rem;
@@ -42,6 +43,7 @@ const View = styled.a`
   text-decoration-thickness: auto;
   text-underline-offset: auto;
   text-underline-position: from-font;
+  cursor: pointer;
 `;
 
 const RoadmapStatusBody = styled.div`
@@ -88,12 +90,20 @@ const StatusNumber = styled.div`
   line-height: normal;
 `;
 
-function RoadmapStatus() {
+function RoadmapStatus({ feedbacks }) {
+  const navigate = useNavigate();
+
   return (
     <RoadmapStatusContainer>
       <RoadmapHeader>
         <RoadmapText>Roadmap</RoadmapText>
-        <View>View</View>
+        <View
+          onClick={() => {
+            navigate("/roadmap");
+          }}
+        >
+          View
+        </View>
       </RoadmapHeader>
       <RoadmapStatusBody>
         <StatusRow>
@@ -101,21 +111,30 @@ function RoadmapStatus() {
             <StatusDot color={"#F49F85"} />
             <StatusName>Planned</StatusName>
           </StatusLeft>
-          <StatusNumber>3</StatusNumber>
+          <StatusNumber>
+            {feedbacks.filter((f) => f.feedback_status === "planned").length}
+          </StatusNumber>
         </StatusRow>
         <StatusRow>
           <StatusLeft>
             <StatusDot color={"#AD1FEA"} />
             <StatusName>In-Progress</StatusName>
           </StatusLeft>
-          <StatusNumber>2</StatusNumber>
+          <StatusNumber>
+            {
+              feedbacks.filter((f) => f.feedback_status === "in_progress")
+                .length
+            }
+          </StatusNumber>
         </StatusRow>
         <StatusRow>
           <StatusLeft>
             <StatusDot color={"#62BCFA"} />
             <StatusName>Live</StatusName>
           </StatusLeft>
-          <StatusNumber>1</StatusNumber>
+          <StatusNumber>
+            {feedbacks.filter((f) => f.feedback_status === "live").length}
+          </StatusNumber>
         </StatusRow>
       </RoadmapStatusBody>
     </RoadmapStatusContainer>

@@ -165,6 +165,10 @@ function Feedbacks() {
     });
   };
 
+  if (!feedbacks || !categories) {
+    return <Spinner />;
+  }
+
   return (
     <StyledFeedbackContainer>
       <Sidebar
@@ -172,6 +176,7 @@ function Feedbacks() {
         categories={feedbackCategories}
         selectedCategory={selectedCategory}
         changeCategory={changeCategory}
+        feedbacks={feedbacks}
       />
       <MainBody>
         <Header>

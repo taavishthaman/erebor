@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import FeedbackDetails from "./pages/FeedbackDetails";
 import EditFeedback from "./pages/EditFeedback";
+import Roadmap from "./pages/Roadmap";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +42,7 @@ function App() {
                 element={<FeedbackDetails />}
               />
               <Route path="/feedback/:id/edit" element={<EditFeedback />} />
+              <Route path="/roadmap" element={<Roadmap />} />
             </Route>
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<Signup />} />

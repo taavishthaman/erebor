@@ -51,6 +51,7 @@ function Sidebar({
   categories,
   selectedCategory,
   changeCategory,
+  feedbacks,
 }) {
   return (
     <StyledSidebar>
@@ -67,7 +68,7 @@ function Sidebar({
         selectedCategory={selectedCategory}
         changeCategory={changeCategory}
       />
-      <RoadmapStatus />
+      <RoadmapStatus feedbacks={feedbacks} />
     </StyledSidebar>
   );
 }
