@@ -301,7 +301,7 @@ function FeedbackDetails() {
         />
         <CommentBox>
           <ContainerHeading>
-            {commentsFlat.length || 0} Comments
+            {commentsFlat?.length || 0} Comments
           </ContainerHeading>
           <NestedCommentsContainer>
             <NestedComments
