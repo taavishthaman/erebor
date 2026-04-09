@@ -214,7 +214,7 @@ function Feedbacks() {
                 category={
                   feedbackCategories?.find(
                     (f) => f.category_id === feedback.category_id,
-                  ).category_name
+                  )?.category_name
                 }
               />
             ))}
