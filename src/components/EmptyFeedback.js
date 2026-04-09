@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import Detective from "../assets/detetctive.svg";
+import { useNavigate } from "react-router-dom";
 
 const StyledEmptyContainer = styled.div`
   display: flex;
@@ -60,6 +61,7 @@ const AddFeedbackBtn = styled.button`
 `;
 
 function EmptyFeedback() {
+  const navigate = useNavigate();
   return (
     <StyledEmptyContainer>
       <DetectiveImg src={Detective} />
@@ -70,7 +72,13 @@ function EmptyFeedback() {
           hearing about new ideas to improve our app.
         </NoFeedbackSubtitle>
       </TextContainer>
-      <AddFeedbackBtn>+ Add Feedback</AddFeedbackBtn>
+      <AddFeedbackBtn
+        onClick={() => {
+          navigate("/feedback/new");
+        }}
+      >
+        + Add Feedback
+      </AddFeedbackBtn>
     </StyledEmptyContainer>
   );
 }
