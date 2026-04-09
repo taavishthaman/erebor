@@ -149,9 +149,11 @@ function NestedComments({
             <CommentBodyContainer>
               <CommentMeta>
                 <UserDataContainer>
-                  <CommenterName>{comments[commentId].name}</CommenterName>
+                  <CommenterName>
+                    {comments[commentId].name || comments[commentId].email}
+                  </CommenterName>
                   <CommenterUsername>
-                    {comments[commentId].username}
+                    {comments[commentId].username || comments[commentId].email}
                   </CommenterUsername>
                 </UserDataContainer>
                 {depth < 2 ? (
