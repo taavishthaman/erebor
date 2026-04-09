@@ -40,7 +40,7 @@ export async function signup({ email, password, passwordConfirm }) {
 
   const response = await fetch(url, options);
   const data = await response.json();
-  if (data.success !== "success") {
+  if (data.status !== "success") {
     throw new Error(data.status);
   }
 
